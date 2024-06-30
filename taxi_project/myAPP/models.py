@@ -10,10 +10,12 @@ class User(models.Model) :
     user_name = models.CharField(max_length=5)
     #나이 범위 제한 1~100
     user_age = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(100)]) 
-    user_gender = models.CharField(max_lenth=1, choice=[
+
+    gender_choices=[
         ('M', '남자'),
         ('F', '여자')
-    ])
+    ]
+    user_gender = models.CharField(max_length=1, choices=gender_choices)
     #정규식으로 유효성 검사
     user_phone = models.CharField(
         max_length=13,
@@ -65,5 +67,5 @@ class Address(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return address_name
+        return self.address_name
 
