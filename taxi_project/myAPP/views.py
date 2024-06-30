@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 
 @api_view(['POST'])
 def add_user(request):
-    
+
     user_data = request.data.get('user')
     protector_data = request.data.get('protector')
     address_data = request.data.get('address')
@@ -30,6 +30,9 @@ def add_user(request):
         return Response(protector_serializer.errors, status=400)
 
     # Address 데이터 저장 (유저와 연결)
+
+    #지금 이렇게 작성해두긴 했는데, 위도, 경도는 입력받은 도로명주소로 지도 api 호출해서 리턴받은 후 작성해야될듯. 
+    
     address_data['address_id'] = user.id  # 유저 ID를 연결
     address_serializer = AddressSerializer(data=address_data)
     if address_serializer.is_valid():
