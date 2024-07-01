@@ -25,7 +25,6 @@ class User(models.Model) :
 
     def set_password(self, raw_password):
         self.user_pwd = make_password(raw_password)
-        self.save()
 
     def check_password(self, raw_password):
         return check_password(raw_password, self.user_pwd)

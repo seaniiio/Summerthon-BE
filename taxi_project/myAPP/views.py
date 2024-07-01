@@ -25,7 +25,7 @@ def signup(request):
     user_serializer = UserSerializer(data=user_data)
     if user_serializer.is_valid():
         user = user_serializer.save()
-        user.set_password(request.data.get('password'))
+        user.set_password(user_data['user_pwd'])
         user.save()
     else:
         return Response({'status':'400','message':user_serializer.errors}, status=400)
@@ -51,3 +51,22 @@ def signup(request):
 
     return Response({'status':'201','message': 'All data added successfully'}, status=201)
 
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def login(request):
+
+    user_login_id = request.data.get('user_login_id')
+    user_pwd = request.data.get('user_pwd')
+
+    user = User.objects.get(user_login_id = user_login_id)
+
+    if user.check_password(user_pwd):
+        token = RefreshToken.for_user(user)
+        refresh_token = str(token)
+        access_token = str(token.access_token)
+
+        return Response({'status':'200', 'refresh_token': refresh_token,
+                        'access_token': access_token, }, status=status.HTTP_200_OK)
+    
+    return Response({'status':'401', 'message': '아이디 또는 비밀번호가 일치하지 않습니다.'}, status=status.HTTP_401_UNAUTHORIZED)
