@@ -76,3 +76,18 @@ class Address(models.Model):
     def __str__(self):
         return self.address_name
 
+class Taxi(models.Model):
+    license_number = models.CharField(max_length=10)
+    # 택시 위도 - 고정
+    latitude = models.DecimalField(max_digits=10, decimal_places=6)
+    # 택시 경도 - 고정
+    longitude = models.DecimalField(max_digits=10, decimal_places=6)
+    driver_name = models.CharField(max_length=5)
+    driver_phone = models.CharField(
+        max_length=13,
+        validators=[RegexValidator(regex=r'^010-\d{4}-\d{4}$', message='올바른 연락처 형식이 아닙니다.')]
+    )
+    acceptance = models.IntegerField(default = 0)
+
+    def __str__(self):
+        return self.license_number

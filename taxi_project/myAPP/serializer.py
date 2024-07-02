@@ -51,3 +51,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
         model = User
         fields = ('user_name', 'user_age', 'user_gender')
         
+class TaxiSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Taxi
+        fields = '__all__'
