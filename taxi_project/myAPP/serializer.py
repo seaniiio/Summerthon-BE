@@ -55,3 +55,5 @@ class TaxiSerializer(serializers.ModelSerializer):
     class Meta:
         model = Taxi
         fields = '__all__'
+
+

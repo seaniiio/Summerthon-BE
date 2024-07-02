@@ -45,12 +45,23 @@ class Protector(models.Model) :
     )
     ############################################
 
+    is_represent_protector = models.BooleanField(default=False)
+
+
+
     def save(self, *args, **kwargs):
         #보호자 default 이름을 보호자1, 보호자2, 보호자3 ... 과 같이 설정하는 함수
         if not self.protector_name:
             protector_count = Protector.objects.filter(user_id=self.user_id).count() + 1
             self.protector_name = f'보호자 {protector_count}'
         super().save(*args, **kwargs)
+
+        # 최초 등록된 보호자를 대표로 설정
+        if Protector.objects.filter(user_id=self.user_id, is_represent_protector=True).count() == 0:
+            self.is_represent_protector = True
+            self.save(update_fields=['is_represent_protector'])
+        elif self.is_represent_protector:
+            Protector.objects.filter(user_id=self.user_id, is_represent_protector=True).exclude(id=self.id).update(is_represent_protector=False)
 
     def __str__(self) : 
         return self.protector_name
@@ -67,11 +78,20 @@ class Address(models.Model):
     #경도. decimal(10,6)
     longitude = models.DecimalField(max_digits=10, decimal_places=6)
 
+    is_represent_address = models.BooleanField(default=False)
+
     def save(self, *args, **kwargs):
         if not self.address_name:
             address_count = Address.objects.filter(user_id=self.user_id).count() + 1
             self.address_name = f'주소지 {address_count}'
+        
         super().save(*args, **kwargs)
+
+        if Address.objects.filter(user_id=self.user_id, is_represent_address=True).count() == 0:
+            self.is_represent_address = True
+            self.save(update_fields=['is_represent_address'])
+        elif self.is_represent_address:
+            Address.objects.filter(user_id=self.user_id, is_represent_address=True).exclude(id=self.id).update(is_represent_address=False)
 
     def __str__(self):
         return self.address_name
