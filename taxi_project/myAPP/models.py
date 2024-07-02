@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
+from django.contrib.auth.hashers import make_password, check_password
 
 class User(models.Model) : 
     # default : (null=False, blank=False)
@@ -22,12 +23,18 @@ class User(models.Model) :
         validators=[RegexValidator(regex=r'^010-\d{4}-\d{4}$', message='올바른 연락처 형식이 아닙니다.')]
     )
 
+    def set_password(self, raw_password):
+        self.user_pwd = make_password(raw_password)
+
+    def check_password(self, raw_password):
+        return check_password(raw_password, self.user_pwd)
+
     def __str__(self):
         return self.user_name
 
 
 class Protector(models.Model) :
-    protector_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name="protector") 
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name="protectors", verbose_name="User") 
     protector_name = models.CharField(max_length=10, null=True, blank=True)
 
     ###########################################
@@ -41,7 +48,7 @@ class Protector(models.Model) :
     def save(self, *args, **kwargs):
         #보호자 default 이름을 보호자1, 보호자2, 보호자3 ... 과 같이 설정하는 함수
         if not self.protector_name:
-            protector_count = Protector.objects.filter(protector_id=self.protector_id).count() + 1
+            protector_count = Protector.objects.filter(user_id=self.user_id).count() + 1
             self.protector_name = f'보호자 {protector_count}'
         super().save(*args, **kwargs)
 
@@ -49,7 +56,7 @@ class Protector(models.Model) :
         return self.protector_name
 
 class Address(models.Model):
-    address_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name="address")
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name="addresses", verbose_name="User")
     address_name = models.CharField(max_length=10, null=True, blank=True)
     #프론트에서 입력받은 도로명주소 저장
     road_address = models.CharField(max_length=200, null=True)
@@ -62,7 +69,7 @@ class Address(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.address_name:
-            address_count = Address.objects.filter(address_id=self.address_id).count() + 1
+            address_count = Address.objects.filter(user_id=self.user_id).count() + 1
             self.address_name = f'주소지 {address_count}'
         super().save(*args, **kwargs)
 
