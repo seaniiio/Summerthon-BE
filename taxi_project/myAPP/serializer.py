@@ -55,3 +55,8 @@ class TaxiSerializer(serializers.ModelSerializer):
     class Meta:
         model = Taxi
         fields = '__all__'
+
+class RoadAddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Address
+        fields = ('road_address', )
