@@ -2,6 +2,8 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
 from django.contrib.auth.hashers import make_password, check_password
 
+from .utils import coordinate_send_request
+
 class User(models.Model) : 
     # default : (null=False, blank=False)
 
@@ -71,6 +73,11 @@ class Address(models.Model):
         if not self.address_name:
             address_count = Address.objects.filter(user_id=self.user_id).count() + 1
             self.address_name = f'주소지 {address_count}'
+        
+        result = coordinate_send_request(self.road_address)
+        self.latitude = result["documents"][0]['y']
+        self.longitude = result["documents"][0]['x']
+
         super().save(*args, **kwargs)
 
     def __str__(self):
