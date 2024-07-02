@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 from .models import *
 from .serializer import *
@@ -18,7 +19,6 @@ from .serializer import *
         method="POST", 
         tags=["회원 api"],
         operation_summary="회원가입", 
-        operation_description="회원가입을 진행합니다.",
         request_body=UserRegisterSerializer
 )
 @api_view(['POST'])
@@ -31,6 +31,18 @@ def signup(request):
         return Response({'status':'201','message': 'All data added successfully'}, status=201)
     return Response({'status':'400','message':serializer.errors}, status=400)
 
+@swagger_auto_schema(
+        method="POST", 
+        tags=["회원 api"],
+        operation_summary="로그인", 
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'user_login_id': openapi.Schema(type=openapi.TYPE_STRING, description='User login ID'),
+                'user_pwd': openapi.Schema(type=openapi.TYPE_STRING, description='User password'),
+            }
+        ),
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def login(request):
