@@ -36,28 +36,32 @@ class User(AbstractBaseUser):
         validators=[RegexValidator(regex=r'^010-\d{4}-\d{4}$', message='올바른 연락처 형식이 아닙니다.')]
     )
 
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
+
     objects = UserManager()
 
     USERNAME_FIELD = 'user_login_id'
-    REQUIRED_FIELDS = ["password", "user_name", "user_age", "user_gender", "user_phone"]
+    REQUIRED_FIELDS = [ "user_name", "user_age", "user_gender", "user_phone"]
 
     def __str__(self):
         return self.user_name
 
+
+    def has_perm(self, perm, obj=None):
+        return self.is_superuser
+
+    def has_module_perms(self, app_label):
+        return self.is_superuser
+
+        
+
 class Protector(models.Model) :
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name="protectors", verbose_name="User") 
     protector_name = models.CharField(max_length=10, null=True, blank=True)
-
-    ###########################################
-    #알림 전송 테스트 할 땐 이메일로 변경 필요.
-    protector_phone = models.CharField(
-        max_length=13,
-        validators=[RegexValidator(regex=r'^010-\d{4}-\d{4}$', message='올바른 연락처 형식이 아닙니다.')]
-    )
-    ############################################
-
+    protector_email = models.EmailField(max_length=254, unique=True)
     is_represent_protector = models.BooleanField(default=False)
-    
+
     def save(self, *args, **kwargs):
         #보호자 default 이름을 보호자1, 보호자2, 보호자3 ... 과 같이 설정하는 함수
         if not self.protector_name:

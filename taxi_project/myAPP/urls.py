@@ -8,5 +8,6 @@ urlpatterns = [
     path('taxi', views.new_taxi),
     path('coordinate', views.coordinate),
     path('me', views.user_info),
-    path('addresses', views.addresses)
+    path('addresses', views.addresses),
+    path('sendmail', views.urgent_call)
 ]

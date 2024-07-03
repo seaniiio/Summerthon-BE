@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
 from django.http import JsonResponse, HttpResponse
+from django.core.mail import send_mail
 
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -16,6 +17,9 @@ from .models import *
 from .serializer import *
 from .utils import coordinate_send_request
 
+################################################################
+# api 1 : 회원가입 
+
 @swagger_auto_schema(
         method="POST", 
         tags=["회원 api"],
@@ -25,17 +29,18 @@ from .utils import coordinate_send_request
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def signup(request):
-    print("signup 실행")
     serializer = UserRegisterSerializer(data = request.data)
-    print("serializer 생성")
 
     if serializer.is_valid():
-        print("serializer valid")
-        print("serializer.data:", serializer)
         serializer.save()
-        print("serializer 저장")
         return Response({'status':'201','message': 'All data added successfully'}, status=201)
     return Response({'status':'400','message':serializer.errors}, status=400)
+
+################################################################
+
+
+################################################################
+# api 2 : 로그인 
 
 @swagger_auto_schema(
         method="POST", 
@@ -45,7 +50,7 @@ def signup(request):
             type=openapi.TYPE_OBJECT,
             properties={
                 'user_login_id': openapi.Schema(type=openapi.TYPE_STRING, description='User login ID'),
-                'password': openapi.Schema(type=openapi.TYPE_STRING, description='User password'),
+                'user_pwd': openapi.Schema(type=openapi.TYPE_STRING, description='User password'),
             }
         ),
 )
@@ -54,19 +59,26 @@ def signup(request):
 def login(request):
 
     user_login_id = request.data.get('user_login_id')
-    password = request.data.get('password')
+    user_pwd = request.data.get('user_pwd')
 
-    user = authenticate(user_login_id=user_login_id, password=password)
+    user = User.objects.get(user_login_id = user_login_id)
 
-    if user is None:
-        return Response({'status':'401', 'message': '아이디 또는 비밀번호가 일치하지 않습니다.'}, status=status.HTTP_401_UNAUTHORIZED)
+    if user.check_password(user_pwd):
+        token = RefreshToken.for_user(user)
+        refresh_token = str(token)
+        access_token = str(token.access_token)
+
+        return Response({'status':'200', 'refresh_token': refresh_token,
+                        'access_token': access_token, }, status=status.HTTP_200_OK)
     
-    token = RefreshToken.for_user(user)
-    update_last_login(None, user)
+    return Response({'status':'401', 'message': '아이디 또는 비밀번호가 일치하지 않습니다.'}, status=status.HTTP_401_UNAUTHORIZED)
 
-    return Response({'status':'200', 'refresh_token': str(token),
-                    'access_token': str(token.access_token), }, status=status.HTTP_200_OK)
-    
+################################################################
+
+
+################################################################
+# api 3 : 택시 생성
+
 @swagger_auto_schema(
         method="POST", 
         tags=["택시 api"],
@@ -83,8 +95,11 @@ def new_taxi(request):
         return Response({'status':'201','message': 'All data added successfully'}, status=201)
     return Response({'status':'400','message':serializer.errors}, status=400)
 
+################################################################
 
-# 도로명주소 -> 위,경도 변환 api
+
+################################################################
+# api 4 : 도로명주소 -> 위,경도 변환 api
 @swagger_auto_schema(
     method="POST", 
     tags=["주소 api"],
@@ -103,11 +118,7 @@ def coordinate(request):
         return Response({"road_address":road_address, "latitude":result["documents"][0]['y'], "longitude":result["documents"][0]['x']}, status=201)
     return Response({'status':'400','message':serializer.errors}, status=400)
 
-@swagger_auto_schema(
-    method="GET", 
-    tags=["회원 api"],
-    operation_summary="회원 정보 get", 
-)
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def user_info(request):
@@ -148,3 +159,40 @@ def addresses(request):
     addresses = Address.objects.filter(user_id=user.id)
     serializer = AddressInfoSerializer(addresses, many=True)
     return Response({"addresses": serializer.data})
+
+
+################################################################
+
+
+################################################################
+# api 6 : 긴급 호출 메일 전송
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def urgent_call(request):
+    user = request.user
+    
+    try:
+        # 대표 보호자 정보 받아오기 (이름, 연락처, 이메일)
+        represent_protector = Protector.objects.get(user_id=user, is_represent_protector=True)
+        represent_protector_email = represent_protector.protector_email  # 보호자의 이메일 주소
+        
+        # 긴급 호출 내용 작성
+        subject = 'SAFE-T 긴급 호출 알림'
+        message = f'SAFE-T로부터의 긴급 알림입니다. \n{user.user_name}님의 보호자 {represent_protector.protector_name}님께 긴급 호출이 발생했습니다. \n즉시 연락해주시기 바랍니다.'
+        from_email = 'SafeT@gmail.com'  # 발신자 이메일 주소
+        
+        # 이메일 전송
+        send_mail(
+            subject,
+            message,
+            from_email,
+            [represent_protector_email],
+            fail_silently=False,
+        )
+        
+        return Response({'status': '200', 'message': '긴급 호출 이메일이 성공적으로 전송되었습니다.'}, status=status.HTTP_200_OK)
+    except Protector.DoesNotExist:
+        return Response({"error": "대표 보호자를 찾을 수 없습니다."}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
