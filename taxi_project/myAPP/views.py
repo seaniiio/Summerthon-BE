@@ -99,3 +99,28 @@ def coordinate(request):
         return Response({"road_address":road_address, "latitude":result["documents"][0]['y'], "longitude":result["documents"][0]['x']}, status=201)
     return Response({'status':'400','message':serializer.errors}, status=400)
 
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def user_info(request, user_login_id):
+    try:
+        user = User.objects.get(user_login_id=user_login_id)
+    except User.DoesnotExist:
+        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    #user serializer
+    user_serializer = UserInfoSerializer(user)
+
+#대표 보호자 정보 받아오기 (이름, 연락처)
+    represent_protector = Protector.objects.get(user_id=user, is_represent_protector=True)
+    represent_protector_serializer = ProtectorRegisterSerializer(represent_protector)
+
+#대표 주소 정보 받아오기 (도로명주소)
+    represent_address=Address.objects.get(user_id=user, is_represent_address=True)
+
+
+    return Response({
+        "user": user_serializer.data,
+        "represent_protector": represent_protector_serializer.data,
+        "represent_address": represent_address.road_address
+    }, status=status.HTTP_200_OK)
