@@ -48,6 +48,7 @@ class Protector(models.Model) :
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name="protectors", verbose_name="User") 
     protector_name = models.CharField(max_length=10, null=True, blank=True)
 
+'''
     ###########################################
     #알림 전송 테스트 할 땐 이메일로 변경 필요.
     protector_phone = models.CharField(
@@ -55,7 +56,8 @@ class Protector(models.Model) :
         validators=[RegexValidator(regex=r'^010-\d{4}-\d{4}$', message='올바른 연락처 형식이 아닙니다.')]
     )
     ############################################
-
+'''
+    protector_email = models.EmailField(max_length=254, unique=True)
     is_represent_protector = models.BooleanField(default=False)
     
     def save(self, *args, **kwargs):

@@ -173,6 +173,5 @@ def urgent_call(request):
     user = request.user
 
     try:
-
         represent_protector = Protector.objects.get(user_id=user, is_represent_protector=True)
         represent_protector_email = represent_protector.email

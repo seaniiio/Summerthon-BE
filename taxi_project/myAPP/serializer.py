@@ -14,7 +14,7 @@ class ProtectorSerializer(serializers.ModelSerializer):
 class ProtectorRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Protector
-        fields = ['protector_name', 'protector_phone', 'is_represent_protector']
+        fields = ['protector_name', 'protector_email', 'is_represent_protector']
 
 class AddressRegisterSerializer(serializers.ModelSerializer):
     class Meta:
