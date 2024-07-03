@@ -43,12 +43,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['localhost','127.0.0.1']
 
-
 # Application definition
 
 INSTALLED_APPS = [
     'myAPP',
     'rest_framework',
+    'rest_framework_simplejwt',
     'drf_yasg',
     'corsheaders',
     'django.contrib.admin',
@@ -58,6 +58,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 ]
+
+AUTH_USER_MODEL = 'myAPP.User'
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
