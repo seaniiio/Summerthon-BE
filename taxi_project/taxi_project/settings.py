@@ -133,6 +133,24 @@ REST_FRAMEWORK = {
 
 REST_USE_JWT = True
 
+
+# settings.py
+
+SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': False,
+    'SECURITY_DEFINITIONS': {
+        'BearerAuth': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+            'description': "JWT Token"
+        }
+    },
+    'SECURITY_REQUIREMENTS': [{
+        'BearerAuth': []
+    }]
+}
+
 from datetime import timedelta
 
 SIMPLE_JWT = {
