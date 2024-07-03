@@ -2,6 +2,8 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
 from django.contrib.auth.hashers import make_password, check_password
 
+from .utils import coordinate_send_request
+
 class User(models.Model) : 
     # default : (null=False, blank=False)
 
@@ -46,9 +48,7 @@ class Protector(models.Model) :
     ############################################
 
     is_represent_protector = models.BooleanField(default=False)
-
-
-
+    
     def save(self, *args, **kwargs):
         #보호자 default 이름을 보호자1, 보호자2, 보호자3 ... 과 같이 설정하는 함수
         if not self.protector_name:
@@ -85,13 +85,17 @@ class Address(models.Model):
             address_count = Address.objects.filter(user_id=self.user_id).count() + 1
             self.address_name = f'주소지 {address_count}'
         
-        super().save(*args, **kwargs)
+        result = coordinate_send_request(self.road_address)
+        self.latitude = result["documents"][0]['y']
+        self.longitude = result["documents"][0]['x']
 
         if Address.objects.filter(user_id=self.user_id, is_represent_address=True).count() == 0:
             self.is_represent_address = True
             self.save(update_fields=['is_represent_address'])
         elif self.is_represent_address:
             Address.objects.filter(user_id=self.user_id, is_represent_address=True).exclude(id=self.id).update(is_represent_address=False)
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.address_name

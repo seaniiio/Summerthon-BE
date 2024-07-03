@@ -6,5 +6,6 @@ urlpatterns = [
     path('signup', views.signup),
     path('login', views.login),
     path('taxi', views.new_taxi),
+    path('coordinate', views.coordinate),
     path('userInfo/<str:user_login_id>', views.user_info),
 ]

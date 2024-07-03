@@ -14,6 +14,7 @@ from drf_yasg import openapi
 
 from .models import *
 from .serializer import *
+from .utils import coordinate_send_request
 
 @swagger_auto_schema(
         method="POST", 
@@ -79,6 +80,26 @@ def new_taxi(request):
     return Response({'status':'400','message':serializer.errors}, status=400)
 
 
+# 도로명주소 -> 위,경도 변환 api
+@swagger_auto_schema(
+    method="POST", 
+    tags=["주소 api"],
+    operation_summary="위도, 경도 변환", 
+    request_body = RoadAddressSerializer
+)
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def coordinate(request):
+    serializer = RoadAddressSerializer(data = request.data)
+    # api 호출
+
+    if serializer.is_valid():
+        road_address = serializer.data['road_address']
+        result = coordinate_send_request(road_address)
+        return Response({"road_address":road_address, "latitude":result["documents"][0]['y'], "longitude":result["documents"][0]['x']}, status=201)
+    return Response({'status':'400','message':serializer.errors}, status=400)
+
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def user_info(request, user_login_id):
@@ -103,4 +124,3 @@ def user_info(request, user_login_id):
         "represent_protector": represent_protector_serializer.data,
         "represent_address": represent_address.road_address
     }, status=status.HTTP_200_OK)
-    

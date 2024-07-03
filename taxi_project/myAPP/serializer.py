@@ -16,15 +16,10 @@ class ProtectorRegisterSerializer(serializers.ModelSerializer):
         model = Protector
         fields = ['protector_name', 'protector_phone']
 
-class AddressSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Address
-        fields = '__all__'
-
 class AddressRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
-        fields = ['address_name', 'road_address', 'detail_address', 'latitude', 'longitude']
+        fields = ['address_name', 'road_address', 'detail_address']
 
 class UserRegisterSerializer(serializers.Serializer):
     user = UserSerializer()
@@ -56,4 +51,7 @@ class TaxiSerializer(serializers.ModelSerializer):
         model = Taxi
         fields = '__all__'
 
-
+class RoadAddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Address
+        fields = ('road_address', )
