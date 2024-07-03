@@ -8,4 +8,5 @@ urlpatterns = [
     path('taxi', views.new_taxi),
     path('coordinate', views.coordinate),
     path('me', views.user_info),
+    path('addresses', views.addresses)
 ]

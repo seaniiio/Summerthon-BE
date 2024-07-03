@@ -21,6 +21,11 @@ class AddressRegisterSerializer(serializers.ModelSerializer):
         model = Address
         fields = ['address_name', 'road_address', 'detail_address', 'is_represent_address']
 
+class AddressInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Address
+        fields = ['address_name', 'road_address', 'latitude', 'longitude']
+
 class UserRegisterSerializer(serializers.Serializer):
     user = UserSerializer()
     protector = ProtectorRegisterSerializer()

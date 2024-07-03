@@ -132,3 +132,19 @@ def user_info(request):
         "represent_protector": represent_protector_serializer.data,
         "represent_address": represent_address.road_address
     }, status=status.HTTP_200_OK)
+
+@swagger_auto_schema(
+    method="GET", 
+    tags=["주소 api"],
+    operation_summary="저장한 주소 get", 
+)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def addresses(request):
+    user = request.user
+    if user is None:
+        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    addresses = Address.objects.filter(user_id=user.id)
+    serializer = AddressInfoSerializer(addresses, many=True)
+    return Response({"addresses": serializer.data})
