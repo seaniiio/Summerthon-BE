@@ -199,6 +199,6 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'  
 EMAIL_PORT = 587  # Gmail SMTP 포트 번호
 EMAIL_USE_TLS = True  # TLS 사용
-EMAIL_HOST_USER = 'summerhack@gmail.com'  # 이메일 주소
+EMAIL_HOST_USER = 'hack.safet@gmail.com'  # 이메일 주소
 EMAIL_HOST_PASSWORD = get_secret('EMAIL_PWD')
 

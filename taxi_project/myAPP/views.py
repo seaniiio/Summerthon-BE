@@ -167,7 +167,7 @@ def addresses(request):
 ################################################################
 # api 6 : 긴급 호출 메일 전송
 
-@api_view(['POST'])
+@api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def urgent_call(request):
     user = request.user
@@ -179,7 +179,7 @@ def urgent_call(request):
         
         # 긴급 호출 내용 작성
         subject = 'SAFE-T 긴급 호출 알림'
-        message = f'SAFE-T로부터의 긴급 알림입니다. \n{user.user_name}님의 보호자 {represent_protector.protector_name}님께 \n긴급 호출이 발생했습니다. 즉시 연락해주시기 바랍니다.'
+        message = f'SAFE-T로부터의 긴급 알림입니다. \n{user.user_name}님의 보호자 {represent_protector.protector_name}님께 긴급 호출이 발생했습니다. \n즉시 연락해주시기 바랍니다.'
         from_email = 'SafeT@gmail.com'  # 발신자 이메일 주소
         
         # 이메일 전송
