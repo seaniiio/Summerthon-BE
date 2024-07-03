@@ -40,7 +40,7 @@ def signup(request):
             type=openapi.TYPE_OBJECT,
             properties={
                 'user_login_id': openapi.Schema(type=openapi.TYPE_STRING, description='User login ID'),
-                'user_pwd': openapi.Schema(type=openapi.TYPE_STRING, description='User password'),
+                'password': openapi.Schema(type=openapi.TYPE_STRING, description='User password'),
             }
         ),
 )
@@ -49,20 +49,19 @@ def signup(request):
 def login(request):
 
     user_login_id = request.data.get('user_login_id')
-    user_pwd = request.data.get('user_pwd')
+    password = request.data.get('password')
+    print("user_login_id : ", user_login_id, "password:", password)
+    user = authenticate(user_login_id=user_login_id, password=password)
 
-    user = User.objects.get(user_login_id = user_login_id)
-
-    if user.check_password(user_pwd):
-        token = RefreshToken.for_user(user)
-        refresh_token = str(token)
-        access_token = str(token.access_token)
-
-        return Response({'status':'200', 'refresh_token': refresh_token,
-                        'access_token': access_token, }, status=status.HTTP_200_OK)
+    if user is None:
+        return Response({'status':'401', 'message': '아이디 또는 비밀번호가 일치하지 않습니다.'}, status=status.HTTP_401_UNAUTHORIZED)
     
-    return Response({'status':'401', 'message': '아이디 또는 비밀번호가 일치하지 않습니다.'}, status=status.HTTP_401_UNAUTHORIZED)
+    token = RefreshToken.for_user(user)
+    update_last_login(None, user)
 
+    return Response({'status':'200', 'refresh_token': str(token),
+                    'access_token': str(token.access_token), }, status=status.HTTP_200_OK)
+    
 @swagger_auto_schema(
         method="POST", 
         tags=["택시 api"],
@@ -98,4 +97,5 @@ def coordinate(request):
         result = coordinate_send_request(road_address)
         return Response({"road_address":road_address, "latitude":result["documents"][0]['y'], "longitude":result["documents"][0]['x']}, status=201)
     return Response({'status':'400','message':serializer.errors}, status=400)
+
 

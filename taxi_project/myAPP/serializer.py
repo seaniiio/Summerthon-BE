@@ -32,7 +32,7 @@ class UserRegisterSerializer(serializers.Serializer):
         address_data = validated_data.pop('address')
 
         user = User.objects.create(**user_data)
-        user.set_password(user_data['user_pwd'])
+        user.set_password(user_data['password'])
         user.save()
 
         Protector.objects.create(user_id=user, **protector_data)

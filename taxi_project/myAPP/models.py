@@ -1,19 +1,60 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
 from django.contrib.auth.hashers import make_password, check_password
+from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 
 from .utils import coordinate_send_request
 
-class User(models.Model) : 
-    # default : (null=False, blank=False)
+# class User(models.Model) : 
+#     # default : (null=False, blank=False)
 
-    # 자동으로 설정되는 id랑 헷갈릴까봐 일단 변수 이름을 user_login_id로 설정했음!
+#     # 자동으로 설정되는 id랑 헷갈릴까봐 일단 변수 이름을 user_login_id로 설정했음!
+#     user_login_id = models.CharField(max_length=15, unique=True)
+#     user_pwd = models.CharField(max_length=20)
+#     user_name = models.CharField(max_length=5)
+#     #나이 범위 제한 1~100
+#     user_age = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(100)]) 
+
+#     gender_choices=[
+#         ('M', '남자'),
+#         ('F', '여자')
+#     ]
+#     user_gender = models.CharField(max_length=1, choices=gender_choices)
+#     #정규식으로 유효성 검사
+#     user_phone = models.CharField(
+#         max_length=13,
+#         validators=[RegexValidator(regex=r'^010-\d{4}-\d{4}$', message='올바른 연락처 형식이 아닙니다.')]
+#     )
+
+#     def set_password(self, raw_password):
+#         self.user_pwd = make_password(raw_password)
+
+#     def check_password(self, raw_password):
+#         return check_password(raw_password, self.user_pwd)
+
+#     def __str__(self):
+#         return self.user_name
+
+class UserManager(BaseUserManager):
+    def create_user(self, user_login_id, password, **extra_fields):
+        if not user_login_id:
+            raise ValueError('The user_login_id field must be set')
+        user = self.model(user_login_id=user_login_id, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, user_login_id, password, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+
+        return self.create_user(user_login_id, password, **extra_fields)
+
+class User(AbstractBaseUser):
     user_login_id = models.CharField(max_length=15, unique=True)
-    user_pwd = models.CharField(max_length=20)
+    password = models.CharField(max_length=20)
     user_name = models.CharField(max_length=5)
-    #나이 범위 제한 1~100
-    user_age = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(100)]) 
-
+    user_age = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(100)]) #나이 범위 제한 1~100
     gender_choices=[
         ('M', '남자'),
         ('F', '여자')
@@ -25,15 +66,13 @@ class User(models.Model) :
         validators=[RegexValidator(regex=r'^010-\d{4}-\d{4}$', message='올바른 연락처 형식이 아닙니다.')]
     )
 
-    def set_password(self, raw_password):
-        self.user_pwd = make_password(raw_password)
+    objects = UserManager()
 
-    def check_password(self, raw_password):
-        return check_password(raw_password, self.user_pwd)
+    USERNAME_FIELD = 'user_login_id'
+    REQUIRED_FIELDS = ["password", "user_name", "user_age", "user_gender", "user_phone"]
 
     def __str__(self):
         return self.user_name
-
 
 class Protector(models.Model) :
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name="protectors", verbose_name="User") 
