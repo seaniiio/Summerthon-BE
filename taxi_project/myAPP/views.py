@@ -300,3 +300,24 @@ def new_protector(request):
         serializer.save()
         return Response({'status':'200'}, status=status.HTTP_200_OK)
     return Response({'status':'400','message':serializer.errors}, status=400)
+
+################################################################
+
+################################################################
+# api 10 : 택시 목록 조회 api
+
+@swagger_auto_schema(
+    method="GET", 
+    tags=["택시 api"],
+    operation_summary="택시 목록 get", 
+)
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+def taxies(request):
+    user = request.user
+    if user is None:
+        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    taxis = Taxi.objects.all()
+    serializer = TaxiSerializer(taxis, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
