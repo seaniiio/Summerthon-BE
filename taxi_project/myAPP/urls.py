@@ -9,5 +9,7 @@ urlpatterns = [
     path('coordinate', views.coordinate),
     path('me', views.user_info),
     path('addresses', views.addresses),
-    path('sendmail', views.urgent_call)
+    path('sendmail', views.urgent_call),
+    path('new/addresses', views.new_address),
+    path('new/protectors', views.new_protector)
 ]
