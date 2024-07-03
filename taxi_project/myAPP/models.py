@@ -36,13 +36,25 @@ class User(AbstractBaseUser):
         validators=[RegexValidator(regex=r'^010-\d{4}-\d{4}$', message='올바른 연락처 형식이 아닙니다.')]
     )
 
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
+
     objects = UserManager()
 
     USERNAME_FIELD = 'user_login_id'
-    REQUIRED_FIELDS = ["password", "user_name", "user_age", "user_gender", "user_phone"]
+    REQUIRED_FIELDS = [ "user_name", "user_age", "user_gender", "user_phone"]
 
     def __str__(self):
         return self.user_name
+
+
+    def has_perm(self, perm, obj=None):
+        return self.is_superuser
+
+    def has_module_perms(self, app_label):
+        return self.is_superuser
+
+        
 
 class Protector(models.Model) :
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name="protectors", verbose_name="User") 
