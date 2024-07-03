@@ -5,8 +5,10 @@ from django.http import JsonResponse, HttpResponse
 from django.core.mail import send_mail, EmailMultiAlternatives
 
 from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -110,7 +112,7 @@ def new_taxi(request):
     request_body = RoadAddressSerializer
 )
 @api_view(['POST'])
-@permission_classes([AllowAny])
+@authentication_classes([JWTAuthentication])
 def coordinate(request):
     serializer = RoadAddressSerializer(data = request.data)
     # api 호출
@@ -130,7 +132,7 @@ def coordinate(request):
     operation_summary="회원 정보 get", 
 )
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
 def user_info(request):
     
     user = request.user
@@ -165,7 +167,7 @@ def user_info(request):
     operation_summary="저장한 주소 get", 
 )
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
 def addresses(request):
     user = request.user
     if user is None:
@@ -188,7 +190,7 @@ def addresses(request):
     operation_summary="긴급 호출 api", 
 )
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
 def urgent_call(request):
     user = request.user
     
@@ -257,7 +259,7 @@ def urgent_call(request):
     ]
 )
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
 def new_address(request):
     user_id = request.user.id
     data = request.data
@@ -285,6 +287,7 @@ def new_address(request):
     operation_summary="보호자 추가 api", 
     request_body = ProtectorAddSerializer
 )
+@authentication_classes([JWTAuthentication])
 @api_view(['POST'])
 def new_protector(request):
     user_id = request.user.id 
