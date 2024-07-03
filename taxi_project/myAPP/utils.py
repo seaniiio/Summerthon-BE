@@ -30,3 +30,14 @@ def coordinate_send_request(road_address):
 
     result = json.loads(str(requests.get(url, headers=headers).text))
     return result
+
+def finding_way_send_request(origin):
+    url = '	https://apis-navi.kakaomobility.com/v1/directions?origin={}&destination=126.651415033662,37.4482020408321'.format(origin)
+
+    headers = {
+        'Authorization': 'KakaoAK {}'.format(KAKAO_KEY),  # Authorization 헤더
+        'Content-Type': 'application/json'  # 필요에 따라 Content-Type 헤더 추가
+    }
+
+    result = json.loads(str(requests.get(url, headers=headers).text))
+    return result

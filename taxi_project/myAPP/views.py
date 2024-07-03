@@ -20,7 +20,7 @@ from email.mime.image import MIMEImage
 
 from .models import *
 from .serializer import *
-from .utils import coordinate_send_request
+from .utils import coordinate_send_request, finding_way_send_request
 
 ################################################################
 # api 1 : 회원가입 
@@ -321,3 +321,51 @@ def taxies(request):
     taxis = Taxi.objects.all()
     serializer = TaxiSerializer(taxis, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+################################################################
+# api 11 : 가까운 택시 조회 api
+
+@swagger_auto_schema(
+    method="GET", 
+    tags=["택시 api"],
+    operation_summary="가까운 택시 get", 
+)
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+def nearby_taxi(request):
+    user = request.user
+    if user is None:
+        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    taxis = Taxi.objects.all()
+    origin_list = []
+
+    for taxi in taxis:
+        origin_str = f"{str(taxi.longitude)},{str(taxi.latitude)}"
+        origin_list.append((taxi.id, origin_str))
+    
+    distance_list = []
+    for origin in origin_list:
+        print("출발지:", origin[1])
+        result = finding_way_send_request(origin[1])
+
+        if result["routes"][0]["result_code"] == 0: # 길찾기 성공한 경우에만
+            distance = result["routes"][0]["summary"]["distance"] # 예상 거리
+            fair = result["routes"][0]["summary"]["fare"]['taxi'] # 예상 요금
+            duration = result["routes"][0]["summary"]["duration"] # 예상 시간
+
+            distance_list.append((origin[0], distance, fair, duration)) # (택시 id, 거리, 요금, 시간)
+
+    print("distance_list:", distance_list)
+    
+    # sort
+    distance_list.sort(key = lambda x : x[1])
+    print("distance_list:", distance_list)
+
+    nearby_taxi_id = distance_list[0][0]
+    nearby_taxi = Taxi.objects.get(id = nearby_taxi_id)
+
+    serializer = TaxiSerializer(nearby_taxi)
+
+    return Response({"taxi": serializer.data, "distance":distance_list[0][1], "fair":distance_list[0][2], "duration":distance_list[0][3]}, status=status.HTTP_200_OK)
+    
