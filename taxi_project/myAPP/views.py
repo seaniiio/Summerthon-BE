@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
 from django.http import JsonResponse, HttpResponse
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMultiAlternatives
 
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -12,6 +12,9 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+
+import base64
+from email.mime.image import MIMEImage
 
 from .models import *
 from .serializer import *
@@ -198,15 +201,40 @@ def urgent_call(request):
         subject = 'SAFE-T 긴급 호출 알림'
         message = f'SAFE-T로부터의 긴급 알림입니다. \n{user.user_name}님의 보호자 {represent_protector.protector_name}님께 긴급 호출이 발생했습니다. \n즉시 연락해주시기 바랍니다.'
         from_email = 'SafeT@gmail.com'  # 발신자 이메일 주소
+
+        with open('static/image/location.png', 'rb') as img_file:
+            img_data_1 = img_file.read()
+        
+        with open('static/image/app_logo.png', 'rb') as img_file:
+            img_data_2 = img_file.read()
         
         # 이메일 전송
-        send_mail(
+        email = EmailMultiAlternatives(
             subject,
             message,
             from_email,
-            [represent_protector_email],
-            fail_silently=False,
+            [represent_protector_email]
         )
+        
+        # HTML 본문 작성
+        html_content = f"""
+        <img src="cid:app_logo" width="10%" alt="logo">
+        <h3>SAFE-T로부터의 긴급 알림입니다.</h3>
+        <p>{user.user_name}님의 보호자 {represent_protector.protector_name}님께 긴급 호출이 발생했습니다.</p>
+        <p>즉시 연락해주시기 바랍니다.</p>
+        <p>긴급 호출을 전송한 사용자의 현재 위치입니다:</p>
+        <img src="cid:location_map" alt="Map">
+        """
+        email.attach_alternative(html_content, "text/html")
+
+        image1 = MIMEImage(img_data_1)
+        image2 = MIMEImage(img_data_2)
+        image1.add_header('Content-ID', '<location_map>')
+        image2.add_header('Content-ID', '<app_logo>')
+        email.attach(image1)
+        email.attach(image2)
+
+        email.send()
         
         return Response({'status': '200', 'message': '긴급 호출 이메일이 성공적으로 전송되었습니다.'}, status=status.HTTP_200_OK)
     except Protector.DoesNotExist:
