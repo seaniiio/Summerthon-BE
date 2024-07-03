@@ -11,6 +11,22 @@ class ProtectorSerializer(serializers.ModelSerializer):
         model = Protector
         fields = '__all__'
 
+class ProtectorAddSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Protector
+        fields = ['protector_name', 'protector_email']
+
+class AddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Address
+        fields = '__all__'
+
+class AddressAddSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Address
+        fields = ['road_address', 'detail_address']
+
+
 class ProtectorRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Protector
