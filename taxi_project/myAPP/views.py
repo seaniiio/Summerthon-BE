@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
 from django.http import JsonResponse, HttpResponse
+from django.core.mail import send_mail
 
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
