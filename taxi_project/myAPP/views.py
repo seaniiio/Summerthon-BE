@@ -171,7 +171,28 @@ def addresses(request):
 @permission_classes([IsAuthenticated])
 def urgent_call(request):
     user = request.user
-
+    
     try:
+        # 대표 보호자 정보 받아오기 (이름, 연락처, 이메일)
         represent_protector = Protector.objects.get(user_id=user, is_represent_protector=True)
-        represent_protector_email = represent_protector.email
+        represent_protector_email = represent_protector.protector_email  # 보호자의 이메일 주소
+        
+        # 긴급 호출 내용 작성
+        subject = 'SAFE-T 긴급 호출 알림'
+        message = f'SAFE-T로부터의 긴급 알림입니다. \n{user.name}님의 보호자 {represent_protector.name}님께 \n긴급 호출이 발생했습니다. 즉시 연락해주시기 바랍니다.'
+        from_email = 'SafeT@gmail.com'  # 발신자 이메일 주소
+        
+        # 이메일 전송
+        send_mail(
+            subject,
+            message,
+            from_email,
+            [represent_protector_email],
+            fail_silently=False,
+        )
+        
+        return Response({'status': '200', 'message': '긴급 호출 이메일이 성공적으로 전송되었습니다.'}, status=status.HTTP_200_OK)
+    except Protector.DoesNotExist:
+        return Response({"error": "대표 보호자를 찾을 수 없습니다."}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
