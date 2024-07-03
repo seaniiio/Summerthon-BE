@@ -118,11 +118,6 @@ def coordinate(request):
         return Response({"road_address":road_address, "latitude":result["documents"][0]['y'], "longitude":result["documents"][0]['x']}, status=201)
     return Response({'status':'400','message':serializer.errors}, status=400)
 
-################################################################
-
-
-################################################################
-# api 5 : 회원 정보 조회
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -148,6 +143,22 @@ def user_info(request):
         "represent_protector": represent_protector_serializer.data,
         "represent_address": represent_address.road_address
     }, status=status.HTTP_200_OK)
+
+@swagger_auto_schema(
+    method="GET", 
+    tags=["주소 api"],
+    operation_summary="저장한 주소 get", 
+)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def addresses(request):
+    user = request.user
+    if user is None:
+        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    addresses = Address.objects.filter(user_id=user.id)
+    serializer = AddressInfoSerializer(addresses, many=True)
+    return Response({"addresses": serializer.data})
 
 
 ################################################################
