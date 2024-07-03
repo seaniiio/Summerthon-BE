@@ -14,12 +14,12 @@ class ProtectorSerializer(serializers.ModelSerializer):
 class ProtectorRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Protector
-        fields = ['protector_name', 'protector_phone']
+        fields = ['protector_name', 'protector_phone', 'is_represent_protector']
 
 class AddressRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
-        fields = ['address_name', 'road_address', 'detail_address']
+        fields = ['address_name', 'road_address', 'detail_address', 'is_represent_address']
 
 class UserRegisterSerializer(serializers.Serializer):
     user = UserSerializer()
