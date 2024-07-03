@@ -103,7 +103,11 @@ def coordinate(request):
         return Response({"road_address":road_address, "latitude":result["documents"][0]['y'], "longitude":result["documents"][0]['x']}, status=201)
     return Response({'status':'400','message':serializer.errors}, status=400)
 
-
+@swagger_auto_schema(
+    method="GET", 
+    tags=["회원 api"],
+    operation_summary="회원 정보 get", 
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def user_info(request):
