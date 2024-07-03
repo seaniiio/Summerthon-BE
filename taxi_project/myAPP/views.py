@@ -17,6 +17,9 @@ from .models import *
 from .serializer import *
 from .utils import coordinate_send_request
 
+################################################################
+# api 1 : 회원가입 
+
 @swagger_auto_schema(
         method="POST", 
         tags=["회원 api"],
@@ -32,6 +35,12 @@ def signup(request):
         serializer.save()
         return Response({'status':'201','message': 'All data added successfully'}, status=201)
     return Response({'status':'400','message':serializer.errors}, status=400)
+
+################################################################
+
+
+################################################################
+# api 2 : 로그인 
 
 @swagger_auto_schema(
         method="POST", 
@@ -64,6 +73,12 @@ def login(request):
     
     return Response({'status':'401', 'message': '아이디 또는 비밀번호가 일치하지 않습니다.'}, status=status.HTTP_401_UNAUTHORIZED)
 
+################################################################
+
+
+################################################################
+# api 3 : 택시 생성
+
 @swagger_auto_schema(
         method="POST", 
         tags=["택시 api"],
@@ -80,8 +95,11 @@ def new_taxi(request):
         return Response({'status':'201','message': 'All data added successfully'}, status=201)
     return Response({'status':'400','message':serializer.errors}, status=400)
 
+################################################################
 
-# 도로명주소 -> 위,경도 변환 api
+
+################################################################
+# api 4 : 도로명주소 -> 위,경도 변환 api
 @swagger_auto_schema(
     method="POST", 
     tags=["주소 api"],
@@ -100,6 +118,11 @@ def coordinate(request):
         return Response({"road_address":road_address, "latitude":result["documents"][0]['y'], "longitude":result["documents"][0]['x']}, status=201)
     return Response({'status':'400','message':serializer.errors}, status=400)
 
+################################################################
+
+
+################################################################
+# api 5 : 회원 정보 조회
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -125,3 +148,6 @@ def user_info(request, user_login_id):
         "represent_protector": represent_protector_serializer.data,
         "represent_address": represent_address.road_address
     }, status=status.HTTP_200_OK)
+
+
+################################################################
