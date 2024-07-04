@@ -266,6 +266,19 @@ def new_address(request):
 
     data['user_id'] = user_id
     latitude_and_longitude = coordinate_send_request(data["road_address"])
+
+    # 회원이 저장한 같은 이름의 주소지가 있는지 검사
+    address_name = request.data.get('address_name') # address_name은 nullable이기 때문에 우선 data에 address_name이 존재하는지 검사
+    if address_name:
+        taxis = Address.objects.filter(user_id=user_id, address_name=address_name)
+        if taxis.exists():
+            return Response({'status':'409','message':'중복된 이름의 주소가 이미 저장되어 있습니다.'}, status=409)
+
+    # 회원이 저장한 같은 도로명 주소가 있는지 검사
+    taxis = Address.objects.filter(user_id=user_id, road_address=data.get("road_address"))
+    if taxis.exists():
+        return Response({'status':'409','message':'중복된 도로명주소가 이미 저장되어 있습니다.'}, status=409)
+
     data['latitude'] = round(float(latitude_and_longitude["documents"][0]['y']), 6)
     data['longitude'] = round(float(latitude_and_longitude["documents"][0]['x']), 6)
 
