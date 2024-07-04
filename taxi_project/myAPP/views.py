@@ -392,13 +392,20 @@ def nearby_taxi(request):
     # 인하대 근처의 주소 중, 랜덤하게 3개의 택시 생성 후 return (가장 가까운 taxi는 표기)
 
 @swagger_auto_schema(
-    method="GET", 
+    method="POST", 
     tags=["택시 api"],
     operation_summary="출발지 근처 3개의 택시 get", 
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'destination_address': openapi.Schema(type=openapi.TYPE_STRING, description='User login ID'),
+        }
+    )
 )
-@api_view(['GET'])
+@api_view(['POST'])
 def call_taxi(request):
     user = request.user
+    destination_address = request.data.get('destination_address')
     if user is None:
         return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
     # 기존에 존재하던 택시 데이터 삭제
@@ -454,7 +461,7 @@ def call_taxi(request):
             duration = result["routes"][0]["summary"]["duration"] # 예상 시간
 
             distance_list.append((origin[0], distance, fair, duration)) # (택시 id, 거리, 요금, 시간)
-            
+
     # distance 기준으로 sort
     distance_list.sort(key = lambda x : x[1])
 
@@ -467,5 +474,14 @@ def call_taxi(request):
         print(serializer.data)
         return_data.append(serializer.data)
 
-    return Response({"taxi": return_data, "distance":distance_list[0][1], "fair":distance_list[0][2], "duration":distance_list[0][3]}, status=status.HTTP_200_OK)
+    # 출발지부터 도착지까지의 비용
+    # destination의 위, 경도
+    dest_coordinate = coordinate_send_request(destination_address)
+    dest_long, dest_lat = dest_coordinate["documents"][0]['x'], dest_coordinate["documents"][0]['y']
+    dest_str = f"{str(dest_long)},{str(dest_lat)}"
+    from_origin_to_dest = finding_way_send_request(dest_str)
+
+    total_fair = from_origin_to_dest["routes"][0]["summary"]["fare"]['taxi']
+
+    return Response({"taxi": return_data, "fair":total_fair, "duration":distance_list[0][3]}, status=status.HTTP_200_OK)
         
