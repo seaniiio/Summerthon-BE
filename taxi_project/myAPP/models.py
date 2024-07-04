@@ -87,9 +87,9 @@ class Address(models.Model):
     #상세주소
     detail_address = models.CharField(max_length=200, null=True, blank=True)
     #위도. decimal(10,6)
-    latitude = models.DecimalField(max_digits=10, decimal_places=6)
+    latitude = models.DecimalField(max_digits=20, decimal_places=16)
     #경도. decimal(10,6)
-    longitude = models.DecimalField(max_digits=10, decimal_places=6)
+    longitude = models.DecimalField(max_digits=20, decimal_places=16)
 
     is_represent_address = models.BooleanField(default=False)
 
@@ -116,9 +116,9 @@ class Address(models.Model):
 class Taxi(models.Model):
     license_number = models.CharField(max_length=10)
     # 택시 위도 - 고정
-    latitude = models.DecimalField(max_digits=10, decimal_places=6)
+    latitude = models.DecimalField(max_digits=20, decimal_places=16)
     # 택시 경도 - 고정
-    longitude = models.DecimalField(max_digits=10, decimal_places=6)
+    longitude = models.DecimalField(max_digits=20, decimal_places=16)
     driver_name = models.CharField(max_length=5)
     driver_phone = models.CharField(
         max_length=13,
