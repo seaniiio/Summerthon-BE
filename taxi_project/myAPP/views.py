@@ -308,6 +308,12 @@ def new_protector(request):
 
     data['user_id'] = user_id
 
+    # 회원이 저장한 같은 이름의 보호자가 있는지 검사
+    protector_name = request.data.get('protector_name') # address_name은 nullable이기 때문에 우선 data에 address_name이 존재하는지 검사
+    protectors = Protector.objects.filter(user_id=user_id, protector_name=protector_name)
+    if protectors.exists():
+        return Response({'status':'409','message':'중복된 이름의 보호자가 이미 저장되어 있습니다.'}, status=409)
+
     serializer = ProtectorSerializer(data = request.data)
     if serializer.is_valid():
         serializer.save()
