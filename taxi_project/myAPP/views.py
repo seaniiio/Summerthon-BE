@@ -20,7 +20,7 @@ from email.mime.image import MIMEImage
 
 from .models import *
 from .serializer import *
-from .utils import coordinate_send_request, finding_way_send_request
+from .utils import coordinate_send_request, finding_way_send_request, generate_random_location, finding_road_send_request
 
 ################################################################
 # api 1 : 회원가입 
@@ -267,6 +267,9 @@ def new_address(request):
     data['user_id'] = user_id
     latitude_and_longitude = coordinate_send_request(data["road_address"])
 
+    if latitude_and_longitude["meta"]["total_count"] == 0:
+        return Response({'status':'400','message':"도로명 주소가 유효하지 않습니다."}, status=400)
+
     # 회원이 저장한 같은 이름의 주소지가 있는지 검사
     address_name = request.data.get('address_name') # address_name은 nullable이기 때문에 우선 data에 address_name이 존재하는지 검사
     if address_name:
@@ -285,7 +288,7 @@ def new_address(request):
     serializer = AddressSerializer(data = request.data)
     if serializer.is_valid():
         serializer.save()
-        return Response({'status':'200'}, status=status.HTTP_200_OK)
+        return Response({'address':serializer.data, 'status':'200'}, status=status.HTTP_200_OK)
     return Response({'status':'400','message':serializer.errors}, status=400)
 
 ################################################################
@@ -317,7 +320,7 @@ def new_protector(request):
     serializer = ProtectorSerializer(data = request.data)
     if serializer.is_valid():
         serializer.save()
-        return Response({'status':'200'}, status=status.HTTP_200_OK)
+        return Response({'protector':serializer.data, 'status':'200'}, status=status.HTTP_200_OK)
     return Response({'status':'400','message':serializer.errors}, status=400)
 
 ################################################################
@@ -344,13 +347,6 @@ def taxies(request):
 ################################################################
 # api 11 : 가까운 택시 조회 api
 
-@swagger_auto_schema(
-    method="GET", 
-    tags=["택시 api"],
-    operation_summary="가까운 택시 get", 
-)
-@api_view(['GET'])
-@authentication_classes([JWTAuthentication])
 def nearby_taxi(request):
     user = request.user
     if user is None:
@@ -388,3 +384,74 @@ def nearby_taxi(request):
 
     return Response({"taxi": serializer.data, "distance":distance_list[0][1], "fair":distance_list[0][2], "duration":distance_list[0][3]}, status=status.HTTP_200_OK)
     
+    ################################################################
+
+    ################################################################
+    # api 12 : 택시 호출 api
+
+    # 인하대 근처의 주소 중, 랜덤하게 3개의 택시 생성 후 return (가장 가까운 taxi는 표기)
+
+@swagger_auto_schema(
+    method="GET", 
+    tags=["택시 api"],
+    operation_summary="출발지 근처 3개의 택시 get", 
+)
+@api_view(['GET'])
+def call_taxi(request):
+    user = request.user
+    if user is None:
+        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+    # 기존에 존재하던 택시 데이터 삭제
+    Taxi.objects.all().delete()
+
+    # 저장한 인하대 위, 경도
+    center_lat = 37.4482020408321
+    center_lon = 126.651415033662
+    radius_km = 1.0  # 반경 1KM
+
+    for i in range(1,4): # 3대의 택시 생성
+        # 랜덤 데이터 생성
+        driver_name = '운전자' + str(i)
+        license_number
+        
+        # 랜덤 좌표 생성
+        random_lat, random_lon = generate_random_location(center_lat, center_lon, radius_km)
+        # 그에 대한 택시 생성
+        serializer = TaxiSerializer(data = request.data)
+        if serializer.is_valid():
+            serializer.save()
+    
+    taxis = Taxi.objects.all()
+    print("taxis:", taxis)
+    origin_list = []
+
+    for taxi in taxis:
+        origin_str = f"{str(taxi.longitude)},{str(taxi.latitude)}"
+        origin_list.append((taxi.id, origin_str))
+    
+    distance_list = []
+    for origin in origin_list:
+        print("출발지:", origin[1])
+        result = finding_way_send_request(origin[1])
+
+        if result["routes"][0]["result_code"] == 0: # 길찾기 성공한 경우에만
+            distance = result["routes"][0]["summary"]["distance"] # 예상 거리
+            fair = result["routes"][0]["summary"]["fare"]['taxi'] # 예상 요금
+            duration = result["routes"][0]["summary"]["duration"] # 예상 시간
+
+            distance_list.append((origin[0], distance, fair, duration)) # (택시 id, 거리, 요금, 시간)
+
+    print("distance_list:", distance_list)
+    
+    # distance 기준으로 sort
+    distance_list.sort(key = lambda x : x[1])
+    print("distance_list:", distance_list)
+
+
+    nearby_taxi_id = distance_list[0][0]
+    nearby_taxi = Taxi.objects.get(id = nearby_taxi_id)
+
+    serializer = TaxiSerializer(nearby_taxi)
+
+    return Response({"taxi": serializer.data, "distance":distance_list[0][1], "fair":distance_list[0][2], "duration":distance_list[0][3]}, status=status.HTTP_200_OK)
+        
