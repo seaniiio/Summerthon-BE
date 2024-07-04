@@ -104,6 +104,17 @@ DATABASES = {
     }
 }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql', # 사용할 db 정보
+#         'NAME': 'summerthon2', # db 이름
+#         'USER': 'root', # db 사용자                      
+#         'PASSWORD': '1234',  # db 패스워드              
+#         'HOST': '127.0.0.1',   # db 호스트                
+#         'PORT': '3306', # db port
+#     }
+# }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -194,9 +205,9 @@ CORS_ALLOW_CREDENTIALS = True
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ko-kr'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Seoul'
 
 USE_I18N = True
 

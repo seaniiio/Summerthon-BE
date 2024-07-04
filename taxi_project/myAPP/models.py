@@ -22,7 +22,7 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser):
     user_login_id = models.CharField(max_length=15, unique=True)
-    password = models.CharField(max_length=20)
+    password = models.CharField(max_length=300)
     user_name = models.CharField(max_length=5)
     user_age = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(100)]) #나이 범위 제한 1~100
     gender_choices=[
