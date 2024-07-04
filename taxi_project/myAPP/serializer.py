@@ -24,7 +24,7 @@ class AddressSerializer(serializers.ModelSerializer):
 class AddressAddSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
-        fields = ['road_address', 'detail_address']
+        fields = ['address_name', 'road_address', 'detail_address']
 
 
 class ProtectorRegisterSerializer(serializers.ModelSerializer):
