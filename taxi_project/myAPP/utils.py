@@ -6,6 +6,7 @@ import json
 
 import math
 import random
+import string
 
 # secret.json에서 카카오 키 가져오기
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -81,3 +82,17 @@ def generate_random_location(lat, lon, radius):
     new_lon = math.degrees(new_lon_rad)
 
     return new_lat, new_lon
+
+def generate_license_number(): # 자동차 번호판 랜덤 생성
+    # 숫자 2자리 또는 3자리 생성
+    num_digits = random.choice([2, 3])
+    digits = ''.join(random.choices(string.digits, k=num_digits))
+    
+    # 한글 문자 생성
+    hangul = chr(random.choice(range(0xAC00, 0xD7A3)))
+
+    # 숫자 4자리 생성
+    last_digits = ''.join(random.choices(string.digits, k=4))
+
+    license_number = f"{digits}{hangul}{last_digits}"
+    return license_number

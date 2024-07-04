@@ -13,7 +13,7 @@ urlpatterns = [
     path('new/addresses', views.new_address),
     path('new/protectors', views.new_protector),
     path('taxies', views.taxies),
-    path('nearby-taxi', views.nearby_taxi),
+    # path('nearby-taxi', views.nearby_taxi),
     path('call-taxi', views.call_taxi)
 
 ]
