@@ -16,6 +16,10 @@ import json
 from django.core.exceptions import ImproperlyConfigured
 import os
 
+import pymysql
+
+pymysql.install_as_MySQLdb()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -97,23 +101,29 @@ WSGI_APPLICATION = 'taxi_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.mysql', # 사용할 db 정보
-#         'NAME': 'summerthon2', # db 이름
-#         'USER': 'root', # db 사용자                      
-#         'PASSWORD': '1234',  # db 패스워드              
-#         'HOST': '127.0.0.1',   # db 호스트                
-#         'PORT': '3306', # db port
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
+
+USER = get_secret('USER') 
+NAME = get_secret('NAME') 
+PASSWORD = get_secret('PASSWORD') 
+HOST = get_secret('HOST') 
+
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql', # 사용할 db 정보
+        'NAME': NAME, # db 이름
+        'USER': USER, # db 사용자                      
+        'PASSWORD': PASSWORD,  # db 패스워드              
+        'HOST': HOST,   # db 호스트                
+        'PORT': 3306, # db port
+    }
+}
 
 
 # Password validation
