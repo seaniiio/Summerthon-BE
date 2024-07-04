@@ -11,5 +11,8 @@ urlpatterns = [
     path('addresses', views.addresses),
     path('sendmail', views.urgent_call),
     path('new/addresses', views.new_address),
-    path('new/protectors', views.new_protector)
+    path('new/protectors', views.new_protector),
+    path('taxies', views.taxies),
+    path('nearby-taxi', views.nearby_taxi)
+
 ]
