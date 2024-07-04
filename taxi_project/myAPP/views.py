@@ -204,10 +204,10 @@ def urgent_call(request):
         message = f'SAFE-T로부터의 긴급 알림입니다. \n{user.user_name}님의 보호자 {represent_protector.protector_name}님께 긴급 호출이 발생했습니다. \n즉시 연락해주시기 바랍니다.'
         from_email = 'SafeT@gmail.com'  # 발신자 이메일 주소
 
-        with open('static/image/location.png', 'rb') as img_file:
+        with open('image/location.png', 'rb') as img_file:
             img_data_1 = img_file.read()
         
-        with open('static/image/app_logo.png', 'rb') as img_file:
+        with open('image/app_logo.png', 'rb') as img_file:
             img_data_2 = img_file.read()
         
         # 이메일 전송
