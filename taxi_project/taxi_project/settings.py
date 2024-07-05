@@ -46,7 +46,7 @@ SECRET_KEY = get_secret('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost','127.0.0.1', '3.36.172.57', "safe-t.kro.kr"] # 탄력적 ip
+ALLOWED_HOSTS = ['localhost','127.0.0.1', '3.36.172.57', "safe-t.kro.kr", "safet.kro.kr", "safe-t.o-r.kr"] # 탄력적 ip
 
 # Application definition
 
@@ -186,7 +186,9 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:8000",
-    "http://safe-t.kro.kr"
+    "http://safe-t.kro.kr",
+    "http://safet.kro.kr",
+    "http://safe-t.o-r.kr/"
 ]
 
 CORS_ALLOW_METHODS = [  # 허용할 옵션
